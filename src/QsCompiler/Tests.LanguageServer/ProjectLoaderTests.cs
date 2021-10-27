@@ -39,11 +39,13 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         private static string SourceFileName(string project, string fileName) =>
             Path.Combine("TestProjects", project, fileName);
 
-        private (string, ProjectInformation?) Context(string project)
+        internal static Uri ProjectUri(string project) =>
+            new Uri(Path.GetFullPath(ProjectFileName(project)));
+
+        internal static (Uri, ProjectInformation?) Context(string project)
         {
-            var relativePath = ProjectFileName(project);
-            var uri = new Uri(Path.GetFullPath(relativePath));
-            return (uri.LocalPath, CompilationContext.Load(uri));
+            var uri = ProjectUri(project);
+            return (uri, CompilationContext.Load(uri));
         }
 
         [TestMethod]
@@ -75,7 +77,7 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void FindProjectTargetFramework()
         {
-            void CompareFramework(string project, string? expected)
+            static void CompareFramework(string project, string? expected)
             {
                 var projectFileName = ProjectFileName(project);
                 var props = new ProjectLoader().DesignTimeBuildProperties(projectFileName, out var _, (x, y) => (y.Contains('.') ? 1 : 0) - (x.Contains('.') ? 1 : 0));
@@ -123,7 +125,7 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
 
             foreach (var project in invalidProjects)
             {
-                var (_, context) = this.Context(project);
+                var (_, context) = Context(project);
                 Assert.IsNull(context);
             }
         }
@@ -131,8 +133,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadOutdatedQSharpProject()
         {
-            var (projectFile, context) = this.Context("test9");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test9");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test9.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -151,8 +153,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadQSharpCoreLibraries()
         {
-            var (projectFile, context) = this.Context("test3");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test3");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test3.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -170,8 +172,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
             Assert.IsFalse(context.UsesXunitHelper());
             CollectionAssert.AreEquivalent(qsFiles, context.SourceFiles.ToArray());
 
-            (projectFile, context) = this.Context("test12");
-            projDir = Path.GetDirectoryName(projectFile) ?? "";
+            (projectFile, context) = Context("test12");
+            projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test12.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -193,8 +195,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadQSharpFrameworkLibrary()
         {
-            var (projectFile, context) = this.Context("test7");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test7");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test7.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -213,8 +215,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadQSharpConsoleApps()
         {
-            var (projectFile, context) = this.Context("test4");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test4");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test4.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -230,8 +232,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
             Assert.IsTrue(context.UsesProject("test3.csproj"));
             CollectionAssert.AreEquivalent(qsFiles, context.SourceFiles.ToArray());
 
-            (projectFile, context) = this.Context("test10");
-            projDir = Path.GetDirectoryName(projectFile) ?? "";
+            (projectFile, context) = Context("test10");
+            projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test10.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -245,8 +247,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
             Assert.IsTrue(context.UsesCanon());
             CollectionAssert.AreEquivalent(qsFiles, context.SourceFiles.ToArray());
 
-            (projectFile, context) = this.Context("test11");
-            projDir = Path.GetDirectoryName(projectFile) ?? "";
+            (projectFile, context) = Context("test11");
+            projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test11.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -264,8 +266,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadQSharpUnitTest()
         {
-            var (projectFile, context) = this.Context("test5");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test5");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test5.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -288,8 +290,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         [TestMethod]
         public void LoadQSharpMultiFrameworkLibrary()
         {
-            var (projectFile, context) = this.Context("test6");
-            var projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = Context("test6");
+            var projDir = Path.GetDirectoryName(projectFile.LocalPath) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test6.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
@@ -307,20 +309,6 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
             Assert.IsTrue(context.UsesProject("test3.csproj"));
             CollectionAssert.AreEquivalent(qsFiles, context.SourceFiles.ToArray());
         }
-
-        [TestMethod]
-        public void LoadQSharpTemporaryProject()
-        {
-            var sourceFile = Path.GetFullPath(SourceFileName("test14", "Operation14.qs"));
-            var projectUri = CompilationContext.CreateTemporaryProject(new Uri(sourceFile), "0.12.20072031");
-            Assert.IsNotNull(projectUri);
-
-            var qsFiles = new string[] { sourceFile };
-            var projectInformation = CompilationContext.Load(projectUri);
-            Assert.IsNotNull(projectInformation);
-            Assert.IsTrue(projectInformation!.UsesCanon());
-            CollectionAssert.AreEquivalent(qsFiles, projectInformation!.SourceFiles.ToArray());
-        }
     }
 
     internal static class CompilationContext
@@ -328,13 +316,11 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
         private static void LogOutput(string msg, MessageType level) =>
             Console.WriteLine($"[{level}]: {msg}");
 
-        internal static ProjectInformation? Load(Uri projectFile) =>
-            new EditorState(new ProjectLoader(LogOutput), null, null, null, null, null)
-                .QsProjectLoader(projectFile, out var loaded) ? loaded : null;
+        internal static EditorState Editor =>
+            new EditorState(new ProjectLoader(LogOutput), null, null, null, null);
 
-        internal static Uri CreateTemporaryProject(Uri sourceFile, string sdkVersion) =>
-            new EditorState(new ProjectLoader(LogOutput), null, null, null, null, null)
-                .QsTemporaryProjectLoader(sourceFile, sdkVersion);
+        internal static ProjectInformation? Load(Uri projectFile) =>
+            Editor.QsProjectLoader(projectFile, out var loaded) ? loaded : null;
 
         internal static bool UsesDll(this ProjectInformation info, string dll) => info.References.Any(r => r.EndsWith(dll));
 
@@ -342,6 +328,8 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
 
         // NB: We check whether the project uses either the 0.3–0.5 name (Primitives) or the 0.6– name (Intrinsic).
         internal static bool UsesIntrinsics(this ProjectInformation info) => info.UsesDll("Microsoft.Quantum.Intrinsic.dll") || info.UsesDll("Microsoft.Quantum.Primitives.dll");
+
+        internal static bool UsesQSharpCore(this ProjectInformation info) => info.UsesDll("Microsoft.Quantum.QSharp.Core.dll");
 
         internal static bool UsesCanon(this ProjectInformation info) =>
             info.UsesDll("Microsoft.Quantum.Canon.dll") ||
