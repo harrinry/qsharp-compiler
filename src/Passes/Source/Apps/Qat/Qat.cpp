@@ -59,9 +59,11 @@
 
 #include <dlfcn.h>
 
+#include <climits>
 #include <iomanip>
 #include <iostream>
 #include <unordered_map>
+
 
 using namespace llvm;
 using namespace microsoft::quantum;
@@ -226,6 +228,9 @@ int main(int argc, char** argv)
                     llvm::ModulePassManager pipeline3 =
                         pass_builder.buildModuleOptimizationPipeline(opt, ptr->isDebugMode());
                     mpm.addPass(std::move(pipeline3));
+
+                    llvm::ModuleInlinerWrapperPass pipeline4 = ModuleInlinerWrapperPass(getInlineParams(INT_MAX));
+                    mpm.addPass(std::move(pipeline4));
                 }
             });
 
