@@ -93,12 +93,9 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
                 ("test2", "netstandard2.0"),
                 ("test3", "netstandard2.0"),
                 ("test3", "netstandard2.0"),
-                //("test4", "netcoreapp2.0"),
-                //("test5", "netcoreapp2.0"),
                 ("test6", "netstandard2.0"),
                 ("test7", "net461"),
                 ("test8", null),
-                //("test9", "netcoreapp2.0"),
                 ("test10", "netcoreapp2.1"),
                 ("test11", "netcoreapp3.0"),
                 ("test12", "netstandard2.1"),
@@ -234,13 +231,13 @@ namespace Microsoft.Quantum.QsLanguageServer.Testing
             CollectionAssert.AreEquivalent(qsFiles, context.SourceFiles.ToArray());
             */
 
-            (projectFile, context) = this.Context("test10");
-            projDir = Path.GetDirectoryName(projectFile) ?? "";
+            var (projectFile, context) = this.Context("test10");
+            var projDir = Path.GetDirectoryName(projectFile) ?? "";
             Assert.IsNotNull(context);
             Assert.AreEqual("test10.dll", Path.GetFileName(context!.Properties.OutputPath));
             Assert.IsTrue((Path.GetDirectoryName(context.Properties.OutputPath) ?? "").StartsWith(projDir));
 
-            qsFiles = new string[]
+            var qsFiles = new string[]
             {
                 Path.Combine(projDir, "Operation10.qs"),
             };
