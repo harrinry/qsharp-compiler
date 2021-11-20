@@ -3,6 +3,9 @@
 
 cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 
+set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld" CACHE STRING "")
+set(LLVM_ENABLE_RUNTIMES "compiler-rt;libcxx;libcxxabi" CACHE STRING "")
+
 message(STATUS CMAKE_HOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME})
 
 if (${CMAKE_HOST_SYSTEM_NAME} MATCHES "Windows")
@@ -39,9 +42,21 @@ message(STATUS CPACK_PACKAGE_FILE_NAME=${CPACK_PACKAGE_FILE_NAME})
 
 # Set up main build props
 
-set(LLVM_ENABLE_LIBXML2 OFF CACHE BOOL "")
+# LLDB
+#set(LLDB_ENABLE_LIBEDIT OFF CACHE BOOL "")
+#set(LLDB_ENABLE_CURSES OFF CACHE BOOL "")
+#set(LLDB_ENABLE_LIBXML2 OFF CACHE BOOL "")
+#set(LLDB_ENABLE_PYTHON OFF CACHE BOOL "")
+#set(LLDB_ENABLE_LUA OFF CACHE BOOL "")
+#
+#if (APPLE)
+#  # Fixing: Development code sign identity not found: 'lldb_codesign'
+#  # This will cause failures in the test suite.
+#  # Usd the system one instead. See 'Code Signing on macOS' in the documentation.
+#  set(LLDB_USE_SYSTEM_DEBUGSERVER ON CACHE BOOL "")
+#  set(LLDB_INCLUDE_TESTS OFF CACHE BOOL "")
+#endif()
 
-#set(CMAKE_BUILD_TYPE Release CACHE STRING "")
 set(CMAKE_BUILD_TYPE MinSizeRel CACHE STRING "")
 
 set(LLVM_TARGETS_TO_BUILD "X86" CACHE STRING "")
